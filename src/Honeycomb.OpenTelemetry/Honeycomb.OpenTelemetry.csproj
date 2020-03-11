@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NuspecFile>Honeycomb.OpenTelemetry.nuspec</NuspecFile>
+    <AssemblyVersion>0.9.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Honeycomb" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.2" />
+    <PackageReference Include="OpenTelemetry" Version="0.2.0-alpha.179" />
+    <PackageReference Include="OpenTelemetry.Api" Version="0.2.0-alpha.179" />
+  </ItemGroup>
+
+</Project>
