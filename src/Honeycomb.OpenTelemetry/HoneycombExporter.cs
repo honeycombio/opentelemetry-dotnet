@@ -76,7 +76,7 @@ namespace Honeycomb.OpenTelemetry
                     DataSetName = _settings.Value.DefaultDataSet,
                     Data = message.Attributes.ToDictionary(a => a.Key, a => a.Value)
                 };
-                messageEvent.Data.Add("meta.span_type", "span_event");
+                messageEvent.Data.Add("meta.annotation_type", "span_event");
                 messageEvent.Data.Add("trace.parent_id", span.Context.SpanId.ToString());
                 messageEvent.Data.Add("name", message.Name);
                 messageEvent.Data.AddRange(baseAttributes);
@@ -90,7 +90,7 @@ namespace Honeycomb.OpenTelemetry
                     DataSetName = _settings.Value.DefaultDataSet,
                     Data = link.Attributes.ToDictionary(a => a.Key, a => a.Value)
                 };
-                linkEvent.Data.Add("meta.span_type", "link");
+                linkEvent.Data.Add("meta.annotation_type", "link");
                 linkEvent.Data.Add("trace.link.span_id", link.Context.SpanId.ToString());
                 linkEvent.Data.Add("trace.link.trace_id", link.Context.TraceId.ToString());
                 linkEvent.Data.AddRange(baseAttributes);
