@@ -1,3 +1,5 @@
+# OpenTelemetry Exporter for .NET
+
 # Setup
 
 ```
@@ -44,3 +46,8 @@ public void ConfigureServices(IServiceCollection services)
   ...
 }
 ```
+
+
+### Donation
+
+This project was kindly donated to Honeycomb by @martinjt.
