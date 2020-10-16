@@ -1,6 +1,6 @@
 # OpenTelemetry Exporter for .NET
 
-# Setup
+## Setup
 
 ```
 dotnet add package OpenTelemetry --version 0.2.0-alpha.179
@@ -48,6 +48,6 @@ public void ConfigureServices(IServiceCollection services)
 ```
 
 
-### Donation
+## Donation
 
-This project was kindly donated to Honeycomb by @martinjt.
+This project was kindly donated to Honeycomb by [@martinjt](https://github.com/martinjt).
