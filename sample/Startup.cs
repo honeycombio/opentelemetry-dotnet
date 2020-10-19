@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Honeycomb.OpenTelemetry;
 using Honeycomb.Models;
 using Honeycomb;
-using OpenTelemetry.Trace.Configuration;
+using OpenTelemetry.Trace;
 
 namespace sample
 {
@@ -31,10 +31,10 @@ namespace sample
             services.AddSingleton<HoneycombExporter>();
 
             // OpenTelemetry Setup
-            services.AddOpenTelemetry((sp, builder) => {
+            services.AddOpenTelemetryTracing((sp, builder) => {
                 builder.UseHoneycomb(sp)
-                    .AddRequestCollector()
-                    .AddDependencyCollector();
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation();
             });
         }
 
