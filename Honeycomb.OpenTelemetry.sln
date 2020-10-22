@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeycomb.OpenTelemetry", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sample", "sample\sample.csproj", "{203485D4-49A0-4FDC-BD94-4D4614BA525A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5F0932EB-818C-4810-9335-2C79E3424694}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeycomb.Samplers.Test", "test\Honeycomb.Samplers.Test\Honeycomb.Samplers.Test.csproj", "{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,8 +50,21 @@ Global
 		{203485D4-49A0-4FDC-BD94-4D4614BA525A}.Release|x64.Build.0 = Release|Any CPU
 		{203485D4-49A0-4FDC-BD94-4D4614BA525A}.Release|x86.ActiveCfg = Release|Any CPU
 		{203485D4-49A0-4FDC-BD94-4D4614BA525A}.Release|x86.Build.0 = Release|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Debug|x64.Build.0 = Debug|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Debug|x86.Build.0 = Debug|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Release|x64.ActiveCfg = Release|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Release|x64.Build.0 = Release|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Release|x86.ActiveCfg = Release|Any CPU
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C2F8CF20-D78C-4A8D-92F3-DEA8CEB258CB} = {553833DF-9FCA-411A-933D-0648B0DFDF71}
+		{07676966-A3CB-4CB6-8FEA-61C79DEB5E63} = {5F0932EB-818C-4810-9335-2C79E3424694}
 	EndGlobalSection
 EndGlobal
