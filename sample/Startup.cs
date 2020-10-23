@@ -36,7 +36,7 @@ namespace sample
                 builder.UseHoneycomb(sp)
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .SetResource(Resources.CreateServiceResource("ny-service-name"));
+                    .SetResource(Resources.CreateServiceResource("my-service-name"));
             });
         }
 
