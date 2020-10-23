@@ -7,7 +7,7 @@ using OpenTelemetry.Trace;
 
 namespace Honeycomb.Samplers
 {
-    public class DeterministicSampler : Sampler
+    public class DeterministicSampler : Sampler, IDisposable
     {
         private const string DescriptionFormat = "DeterministicSampler({0})";
         private const string SampleRateAttributeName = "sampleRate";
@@ -16,8 +16,9 @@ namespace Honeycomb.Samplers
         private const int Four = 4;
         private const int One = 1;
         private const int Base16 = 16;
-        private int sampleRate;
-        private long upperBound;
+        private readonly SHA1 sha1 = SHA1.Create();
+        private readonly int sampleRate;
+        private readonly long upperBound;
 
         public DeterministicSampler(int sampleRate)
         {
@@ -42,20 +43,17 @@ namespace Honeycomb.Samplers
                 return CreateResult(SamplingDecision.Drop, Zero);
             }
 
-            using (var hash = SHA1.Create())
-            {
-                var bytes = Encoding.UTF8.GetBytes(samplingParameters.TraceId.ToString());
-                var digest = hash.ComputeHash(bytes);
-                var determinant = Convert.ToUInt32(BitConverter.ToString(digest, Zero, Four).Replace(Hphen, string.Empty).ToLower(), Base16);
-                var decision = determinant <= upperBound
-                    ? SamplingDecision.RecordAndSample
-                    : SamplingDecision.Drop;
+            var bytes = Encoding.UTF8.GetBytes(samplingParameters.TraceId.ToString());
+            var hash = sha1.ComputeHash(bytes);
+            var determinant = Convert.ToUInt32(BitConverter.ToString(hash, Zero, Four).Replace(Hphen, string.Empty).ToLower(), Base16);
+            var decision = determinant <= upperBound
+                ? SamplingDecision.RecordAndSample
+                : SamplingDecision.Drop;
 
-                return CreateResult(
-                    decision,
-                    decision == SamplingDecision.RecordAndSample ? sampleRate : Zero
-                );
-            }
+            return CreateResult(
+                decision,
+                decision == SamplingDecision.RecordAndSample ? sampleRate : Zero
+            );
         }
 
         private static SamplingResult CreateResult(SamplingDecision decision, int sampleRate)
@@ -64,6 +62,11 @@ namespace Honeycomb.Samplers
                 decision,
                 new Dictionary<string, object>{ {SampleRateAttributeName, sampleRate} }
             );
+        }
+
+        public void Dispose()
+        {
+            sha1.Dispose();
         }
     }
 }
