@@ -1,15 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Honeycomb.Models;
-using OpenTelemetry.Trace.Export;
 using Microsoft.Extensions.Options;
 using System;
+using OpenTelemetry;
+using System.Diagnostics;
 
 namespace Honeycomb.OpenTelemetry
 {
-    public class HoneycombExporter : SpanExporter
+    public class HoneycombExporter : BaseExporter<Activity>
     {
         private readonly IHoneycombService _honeycombService;
         private readonly IOptions<HoneycombApiSettings> _settings;
@@ -20,75 +19,75 @@ namespace Honeycomb.OpenTelemetry
             _settings = settings;
         }
 
-        public async override Task<ExportResult> ExportAsync(IEnumerable<SpanData> batch, CancellationToken cancellationToken)
+        public override ExportResult Export(in Batch<Activity> batch)
         {
-            var honeycombEvents = new List<HoneycombEvent>();
-
-            foreach (var span in batch)
+            using (var scope = SuppressInstrumentationScope.Begin())
             {
-                if (span.Attributes
-                        .Any(a => a.Key == "http.url" && 
-                                 (a.Value is string urlStr && 
-                                  urlStr.StartsWith("https://api.honeycomb.io/"))))
-                    continue;
-                
-                var events = GenerateEvent(span);
-                honeycombEvents.AddRange(events);
-            }
-            await _honeycombService.SendBatchAsync(honeycombEvents);
+                try
+                {
+                    var honeycombEvents = new List<HoneycombEvent>();
+                    foreach (var activity in batch)
+                    {
+                        // TODO: skip activities where url starts with https://api.honeycomb.com
 
-            return ExportResult.Success;
+                        var events = GenerateEvent(activity);
+                        honeycombEvents.AddRange(events);
+                    }
+
+                    _honeycombService.SendBatchAsync(honeycombEvents).ConfigureAwait(false).GetAwaiter().GetResult();
+                    return ExportResult.Success;
+                }
+                catch (Exception)
+                {
+                    return ExportResult.Failure;
+                }
+            }
         }
 
-        private IEnumerable<HoneycombEvent> GenerateEvent(SpanData span)
+        private IEnumerable<HoneycombEvent> GenerateEvent(Activity activity)
         {
             var list = new List<HoneycombEvent>();
 
             var ev = new HoneycombEvent {
-                EventTime = span.StartTimestamp.UtcDateTime,
+                EventTime = activity.StartTimeUtc,
                 DataSetName = _settings.Value.DefaultDataSet
             };
             var baseAttributes = new Dictionary<string, object> {
-                {"trace.trace_id", span.Context.TraceId.ToString()},
-                {"service_name", span.Name}
+                {"trace.trace_id", activity.Context.TraceId.ToString()},
+                {"service_name", activity.DisplayName}
             };
-            if (span.ParentSpanId.ToString() != "0000000000000000")
-                ev.Data.Add("trace.parent_id", span.ParentSpanId.ToString());
+            if (activity.ParentSpanId.ToString() != "0000000000000000")
+                ev.Data.Add("trace.parent_id", activity.ParentSpanId.ToString());
 
             ev.Data.AddRange(baseAttributes);
-            ev.Data.Add("trace.span_id", span.Context.SpanId.ToString());
-            ev.Data.Add("duration_ms", (span.EndTimestamp - span.StartTimestamp).TotalMilliseconds);
+            ev.Data.Add("trace.span_id", activity.Context.SpanId.ToString());
+            ev.Data.Add("duration_ms", activity.Duration.Milliseconds);
 
-            foreach (var label in span.Attributes)
+            foreach (var label in activity.Tags)
             {
                 ev.Data.Add(label.Key, label.Value.ToString());
             }
 
-            foreach (var attr in span.LibraryResource.Attributes)
-            {
-                ev.Data.Add(attr.Key, attr.Value);
-            }
-
-            foreach (var message in span.Events)
+            foreach (var message in activity.Events)
             {
                 var messageEvent = new HoneycombEvent {
                     EventTime = message.Timestamp.UtcDateTime,
                     DataSetName = _settings.Value.DefaultDataSet,
-                    Data = message.Attributes.ToDictionary(a => a.Key, a => a.Value)
+                    Data = message.Tags.ToDictionary(a => a.Key, a => a.Value)
                 };
                 messageEvent.Data.Add("meta.annotation_type", "span_event");
-                messageEvent.Data.Add("trace.parent_id", span.Context.SpanId.ToString());
+                messageEvent.Data.Add("trace.parent_id", activity.Context.SpanId.ToString());
                 messageEvent.Data.Add("name", message.Name);
                 messageEvent.Data.AddRange(baseAttributes);
                 list.Add(messageEvent);
             }
 
-            foreach (var link in span.Links)
+            foreach (var link in activity.Links)
             {
                 var linkEvent = new HoneycombEvent {
-                    EventTime = span.StartTimestamp.UtcDateTime,
+                    EventTime = activity.StartTimeUtc,
                     DataSetName = _settings.Value.DefaultDataSet,
-                    Data = link.Attributes.ToDictionary(a => a.Key, a => a.Value)
+                    Data = link.Tags.ToDictionary(a => a.Key, a => a.Value)
                 };
                 linkEvent.Data.Add("meta.annotation_type", "link");
                 linkEvent.Data.Add("trace.link.span_id", link.Context.SpanId.ToString());
@@ -99,11 +98,6 @@ namespace Honeycomb.OpenTelemetry
 
             list.Add(ev);
             return list;
-        }
-
-        public override Task ShutdownAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 
