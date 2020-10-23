@@ -7,6 +7,7 @@ using Honeycomb.OpenTelemetry;
 using Honeycomb.Models;
 using Honeycomb;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 
 namespace sample
 {
@@ -34,7 +35,8 @@ namespace sample
             services.AddOpenTelemetryTracing((sp, builder) => {
                 builder.UseHoneycomb(sp)
                     .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .SetResource(Resources.CreateServiceResource("ny-service-name"));
             });
         }
 

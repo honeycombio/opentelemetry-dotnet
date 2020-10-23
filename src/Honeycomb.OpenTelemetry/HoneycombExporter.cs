@@ -4,6 +4,7 @@ using Honeycomb.Models;
 using Microsoft.Extensions.Options;
 using System;
 using OpenTelemetry;
+using OpenTelemetry.Trace;
 using System.Diagnostics;
 
 namespace Honeycomb.OpenTelemetry
@@ -66,6 +67,20 @@ namespace Honeycomb.OpenTelemetry
             foreach (var label in activity.Tags)
             {
                 ev.Data.Add(label.Key, label.Value.ToString());
+            }
+
+            var resource = activity.GetResource();
+            foreach (var attribute in resource.Attributes)
+            {
+                // map service.name to service_name
+                if (attribute.Key == "service.name")
+                {
+                    ev.Data["service_name"] = attribute.Value;
+                }
+                else
+                {
+                    ev.Data.Add(attribute.Key, attribute.Value);
+                }
             }
 
             foreach (var message in activity.Events)
