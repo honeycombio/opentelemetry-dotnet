@@ -11,7 +11,7 @@ namespace Honeycomb.Samplers
     {
         private const string DescriptionFormat = "DeterministicSampler({0})";
         private const string SampleRateAttributeName = "sampleRate";
-        private const string Hphen = "-";
+        private const string Hyphen = "-";
         private const int Zero = 0;
         private const int Four = 4;
         private const int One = 1;
@@ -45,7 +45,7 @@ namespace Honeycomb.Samplers
 
             var bytes = Encoding.UTF8.GetBytes(samplingParameters.TraceId.ToString());
             var hash = sha1.ComputeHash(bytes);
-            var determinant = Convert.ToUInt32(BitConverter.ToString(hash, Zero, Four).Replace(Hphen, string.Empty).ToLower(), Base16);
+            var determinant = Convert.ToUInt32(BitConverter.ToString(hash, Zero, Four).Replace(Hyphen, string.Empty).ToLower(), Base16);
             var decision = determinant <= upperBound
                 ? SamplingDecision.RecordAndSample
                 : SamplingDecision.Drop;
