@@ -38,7 +38,7 @@ namespace Honeycomb.Samplers
             {
                 return CreateResult(SamplingDecision.RecordAndSample, One);
             }
-            if (sampleRate == One)
+            if (sampleRate == Zero)
             {
                 return CreateResult(SamplingDecision.Drop, Zero);
             }
