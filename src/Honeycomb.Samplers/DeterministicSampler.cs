@@ -18,8 +18,9 @@ namespace Honeycomb.Samplers
         private const int IndexFour = 4;
         private const int Base16 = 16;
         private readonly SHA1 sha1 = SHA1.Create();
-        private readonly int sampleRate;
-        private readonly long upperBound;
+
+        public int SampleRate { get; private set; }
+        public long UpperBound { get; private set; }
 
         public DeterministicSampler(int sampleRate)
         {
@@ -28,18 +29,18 @@ namespace Honeycomb.Samplers
                 throw new ArgumentOutOfRangeException("Sample rate must not be negative.");
             }
 
-            this.sampleRate = sampleRate;
-            this.Description = string.Format(DescriptionFormat, this.sampleRate.ToString(CultureInfo.InvariantCulture));
-            this.upperBound = sampleRate == NeverSample ? NeverSample : uint.MaxValue / sampleRate;
+            this.SampleRate = sampleRate;
+            this.Description = string.Format(DescriptionFormat, this.SampleRate.ToString(CultureInfo.InvariantCulture));
+            this.UpperBound = sampleRate == NeverSample ? NeverSample : uint.MaxValue / sampleRate;
         }
 
         public override SamplingResult ShouldSample(in SamplingParameters samplingParameters)
         {
-            if (sampleRate == AlwaysSample)
+            if (SampleRate == AlwaysSample)
             {
                 return CreateResult(SamplingDecision.RecordAndSample, AlwaysSample);
             }
-            if (sampleRate == NeverSample)
+            if (SampleRate == NeverSample)
             {
                 return CreateResult(SamplingDecision.Drop, NeverSample);
             }
@@ -47,13 +48,13 @@ namespace Honeycomb.Samplers
             var bytes = Encoding.UTF8.GetBytes(samplingParameters.TraceId.ToString());
             var hash = sha1.ComputeHash(bytes);
             var determinant = Convert.ToUInt32(BitConverter.ToString(hash, IndexZero, IndexFour).Replace(Hyphen, string.Empty).ToLower(), Base16);
-            var decision = determinant <= upperBound
+            var decision = determinant <= UpperBound
                 ? SamplingDecision.RecordAndSample
                 : SamplingDecision.Drop;
 
             return CreateResult(
                 decision,
-                decision == SamplingDecision.RecordAndSample ? sampleRate : NeverSample
+                decision == SamplingDecision.RecordAndSample ? SampleRate : NeverSample
             );
         }
 
