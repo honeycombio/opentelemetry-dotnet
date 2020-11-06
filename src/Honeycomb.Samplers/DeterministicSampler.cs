@@ -7,6 +7,10 @@ using OpenTelemetry.Trace;
 
 namespace Honeycomb.Samplers
 {
+    /// <summary>
+    /// An OpenTelemetry Sampler implementation that produces deterministic results that is compatible with
+    /// Honeycomb Beelines.
+    /// </summary>
     public class DeterministicSampler : Sampler, IDisposable
     {
         private const string DescriptionFormat = "DeterministicSampler({0})";
@@ -19,9 +23,19 @@ namespace Honeycomb.Samplers
         private const int Base16 = 16;
         private readonly SHA1 sha1 = SHA1.Create();
 
+        /// <summary>
+        /// The sample rate for spans to be exported. Express as 1/X where x is the sample rate value.
+        /// </summary>
         public int SampleRate { get; private set; }
+
+        /// <summary>
+        /// The calculated upper bound the sample rate must be equal to or below to be sampled.
+        /// </summary>
         public long UpperBound { get; private set; }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="DeterministicSampler"/>.
+        /// </summary>
         public DeterministicSampler(int sampleRate)
         {
             if (sampleRate < NeverSample)
@@ -34,6 +48,7 @@ namespace Honeycomb.Samplers
             this.UpperBound = sampleRate == NeverSample ? NeverSample : uint.MaxValue / sampleRate;
         }
 
+        /// <inheritdoc/>
         public override SamplingResult ShouldSample(in SamplingParameters samplingParameters)
         {
             if (SampleRate == AlwaysSample)
