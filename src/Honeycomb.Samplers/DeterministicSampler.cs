@@ -22,6 +22,8 @@ namespace Honeycomb.Samplers
         private const int IndexFour = 4;
         private const int Base16 = 16;
         private readonly SHA1 sha1 = SHA1.Create();
+        private static SamplingResult AlwaysSampleResult = CreateResult(SamplingDecision.RecordAndSample, AlwaysSample);
+        private static SamplingResult NeverSampleResult = CreateResult(SamplingDecision.Drop, NeverSample);
 
         /// <summary>
         /// The sample rate for spans to be exported. Express as 1/X where x is the sample rate value.
@@ -53,11 +55,11 @@ namespace Honeycomb.Samplers
         {
             if (SampleRate == AlwaysSample)
             {
-                return CreateResult(SamplingDecision.RecordAndSample, AlwaysSample);
+                return AlwaysSampleResult;
             }
             if (SampleRate == NeverSample)
             {
-                return CreateResult(SamplingDecision.Drop, NeverSample);
+                return NeverSampleResult;
             }
 
             var bytes = Encoding.UTF8.GetBytes(samplingParameters.TraceId.ToString());
