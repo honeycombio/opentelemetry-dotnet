@@ -12,9 +12,10 @@ namespace Honeycomb.Samplers
         private const string DescriptionFormat = "DeterministicSampler({0})";
         private const string SampleRateAttributeName = "sampleRate";
         private const string Hyphen = "-";
-        private const int Zero = 0;
-        private const int Four = 4;
-        private const int One = 1;
+        private const int AlwaysSample = 1;
+        private const int NeverSample = 0;
+        private const int IndexZero = 0;
+        private const int IndexFour = 4;
         private const int Base16 = 16;
         private readonly SHA1 sha1 = SHA1.Create();
         private readonly int sampleRate;
@@ -22,37 +23,37 @@ namespace Honeycomb.Samplers
 
         public DeterministicSampler(int sampleRate)
         {
-            if (sampleRate < Zero)
+            if (sampleRate < NeverSample)
             {
                 throw new ArgumentOutOfRangeException("Sample rate must not be negative.");
             }
 
             this.sampleRate = sampleRate;
             this.Description = string.Format(DescriptionFormat, this.sampleRate.ToString(CultureInfo.InvariantCulture));
-            this.upperBound = sampleRate == Zero ? Zero : uint.MaxValue / sampleRate;
+            this.upperBound = sampleRate == NeverSample ? NeverSample : uint.MaxValue / sampleRate;
         }
 
         public override SamplingResult ShouldSample(in SamplingParameters samplingParameters)
         {
-            if (sampleRate == One)
+            if (sampleRate == AlwaysSample)
             {
-                return CreateResult(SamplingDecision.RecordAndSample, One);
+                return CreateResult(SamplingDecision.RecordAndSample, AlwaysSample);
             }
-            if (sampleRate == Zero)
+            if (sampleRate == NeverSample)
             {
-                return CreateResult(SamplingDecision.Drop, Zero);
+                return CreateResult(SamplingDecision.Drop, NeverSample);
             }
 
             var bytes = Encoding.UTF8.GetBytes(samplingParameters.TraceId.ToString());
             var hash = sha1.ComputeHash(bytes);
-            var determinant = Convert.ToUInt32(BitConverter.ToString(hash, Zero, Four).Replace(Hyphen, string.Empty).ToLower(), Base16);
+            var determinant = Convert.ToUInt32(BitConverter.ToString(hash, IndexZero, IndexFour).Replace(Hyphen, string.Empty).ToLower(), Base16);
             var decision = determinant <= upperBound
                 ? SamplingDecision.RecordAndSample
                 : SamplingDecision.Drop;
 
             return CreateResult(
                 decision,
-                decision == SamplingDecision.RecordAndSample ? sampleRate : Zero
+                decision == SamplingDecision.RecordAndSample ? sampleRate : NeverSample
             );
         }
 
