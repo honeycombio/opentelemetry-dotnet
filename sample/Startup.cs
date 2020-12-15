@@ -6,8 +6,10 @@ using Microsoft.Extensions.Hosting;
 using Honeycomb.OpenTelemetry;
 using Honeycomb.Models;
 using Honeycomb;
+using OpenTelemetry;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
+using Microsoft.Extensions.Options;
 
 namespace sample
 {
@@ -29,14 +31,20 @@ namespace sample
             services.Configure<HoneycombApiSettings>(Configuration.GetSection("HoneycombSettings"));
             services.AddHttpClient("honeycomb");
             services.AddSingleton<IHoneycombService, HoneycombService>();
-            services.AddSingleton<HoneycombExporter>();
 
             // OpenTelemetry Setup
             services.AddOpenTelemetryTracing((sp, builder) => {
-                builder.UseHoneycomb(sp)
+                builder.AddHoneycombExporter(sp.GetRequiredService<IHoneycombService>(), hc =>
+                    {
+                        var hcApiSettings = sp.GetRequiredService<IOptions<HoneycombApiSettings>>();
+                        hc.DefaultDataSet = hcApiSettings.Value.DefaultDataSet;
+                        hc.TeamId = hcApiSettings.Value.TeamId;
+                    })
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .SetResource(Resources.CreateServiceResource("my-service-name"));
+                    .SetResourceBuilder(ResourceBuilder
+                        .CreateDefault()
+                        .AddService(serviceName: "my-service-name"));
             });
         }
 

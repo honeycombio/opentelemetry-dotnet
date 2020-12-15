@@ -11,13 +11,13 @@ namespace Honeycomb.OpenTelemetry
 {
     public class HoneycombExporter : BaseExporter<Activity>
     {
+        private readonly HoneycombExporterOptions _options;
         private readonly IHoneycombService _honeycombService;
-        private readonly IOptions<HoneycombApiSettings> _settings;
 
-        public HoneycombExporter(IHoneycombService honeycombService, IOptions<HoneycombApiSettings> settings)
+        internal HoneycombExporter(HoneycombExporterOptions options, IHoneycombService honeycombService)
         {
-            _honeycombService = honeycombService;
-            _settings = settings;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _honeycombService = honeycombService ?? throw new ArgumentNullException(nameof(honeycombService));
         }
 
         public override ExportResult Export(in Batch<Activity> batch)
@@ -51,7 +51,7 @@ namespace Honeycomb.OpenTelemetry
 
             var ev = new HoneycombEvent {
                 EventTime = activity.StartTimeUtc,
-                DataSetName = _settings.Value.DefaultDataSet
+                DataSetName = _options.DefaultDataSet
             };
             var baseAttributes = new Dictionary<string, object> {
                 {"trace.trace_id", activity.Context.TraceId.ToString()},
@@ -69,7 +69,7 @@ namespace Honeycomb.OpenTelemetry
                 ev.Data.Add(label.Key, label.Value.ToString());
             }
 
-            var resource = activity.GetResource();
+            var resource = this.ParentProvider.GetResource();
             foreach (var attribute in resource.Attributes)
             {
                 // map service.name to service_name
@@ -87,7 +87,7 @@ namespace Honeycomb.OpenTelemetry
             {
                 var messageEvent = new HoneycombEvent {
                     EventTime = message.Timestamp.UtcDateTime,
-                    DataSetName = _settings.Value.DefaultDataSet,
+                    DataSetName = _options.DefaultDataSet,
                     Data = message.Tags.ToDictionary(a => a.Key, a => a.Value)
                 };
                 messageEvent.Data.Add("meta.annotation_type", "span_event");
@@ -101,7 +101,7 @@ namespace Honeycomb.OpenTelemetry
             {
                 var linkEvent = new HoneycombEvent {
                     EventTime = activity.StartTimeUtc,
-                    DataSetName = _settings.Value.DefaultDataSet,
+                    DataSetName = _options.DefaultDataSet,
                     Data = link.Tags.ToDictionary(a => a.Key, a => a.Value)
                 };
                 linkEvent.Data.Add("meta.annotation_type", "link");

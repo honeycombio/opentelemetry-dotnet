@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Honeycomb.OpenTelemetry</id>
-    <version>0.9.0-pre</version>
+    <version>0.10.0-pre</version>
     <title>Honeycomb.OpenTelemetry</title>
     <authors>MartinJT</authors>
     <owners>MartinJT</owners>
@@ -20,8 +20,8 @@
     <group targetFramework="netstandard2.0">
       <dependency id="Newtonsoft.Json" version="9.0.1" />
       <dependency id="Honeycomb" version="1.0.0" />
-      <dependency id="OpenTelemetry" version="0.2.0-alpha.179" />
-      <dependency id="OpenTelemetry.Api" version="0.2.0-alpha.179" />
+      <dependency id="OpenTelemetry" version="1.0.0-rc1.1" />
+      <dependency id="OpenTelemetry.Api" version="1.0.0-rc1.1" />
       <dependency id="Microsoft.Extensions.DependencyInjection" version="3.1.2" />
       <dependency id="Microsoft.Extensions.Options" version="3.1.2" />
     </group>
