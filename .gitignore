@@ -357,3 +357,5 @@ MigrationBackup/
 appsettings.Development.json
 
 codedeploy/app
+.idea/
+.DS_Store
