@@ -1,7 +1,9 @@
 # OpenTelemetry Exporter for .NET
 
-**NOTE**: Did you know that Honeycomb now supports OTLP ingest directly? This means you can use an [OTLP exporter](https://docs.honeycomb.io/getting-data-in/dotnet/) and no longer need this exporter to send data to Honeycomb.
-￼
+[![OSS Lifecycle](https://img.shields.io/osslifecycle/honeycombio/opentelemetry-dotnet)](https://github.com/honeycombio/home/blob/main/honeycomb-oss-lifecycle-and-practices.md)
+
+**STATUS: this project is being sunset.** See https://github.com/honeycombio/opentelemetry-dotnet/issues/14
+
 ## Setup
 
 ```
